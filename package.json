@@ -78,26 +78,6 @@
           "default": "off",
           "description": "Traces the communication between VSCode and the languageServerExample service."
         },
-        "yaml.schemas": {
-          "type": "object",
-          "default": {},
-          "description": "Associate schemas to Yaml files in the current workspace"
-        },
-        "yaml.format.enable": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable/disable default YAML formatter (requires restart)"
-        },
-        "yaml.format.singleQuote": {
-          "type": "boolean",
-          "default": false,
-          "description": "Use single quotes instead of double quotes"
-        },
-        "yaml.format.bracketSpacing": {
-          "type": "boolean",
-          "default": true,
-          "description": "Print spaces between brackets in objects"
-        },
         "yaml.format.proseWrap": {
           "type": "string",
           "default": "preserve",
@@ -106,32 +86,8 @@
             "never",
             "always"
           ],
-          "description": "Always: wrap prose if it exeeds the print width, Never: never wrap the prose, Preserve: wrap prose as-is"
-        },
-        "yaml.validate": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable/disable validation feature"
-        },
-        "yaml.hover": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable/disable hover feature"
-        },
-        "yaml.completion": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable/disable completion feature"
-        },
-        "yaml.customTags": {
-          "type": "array",
-          "default": [],
-          "description": "Custom tags for the parser to use"
-        },
-        "yaml.schemaStore.enable": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically pull available YAML schemas from JSON Schema Store"
+          "description": "Always: wrap prose if it exeeds the print width, Never: never wrap the prose, Preserve: wrap prose as-is",
+          "scope": "resource"
         }
       }
     },
@@ -160,7 +116,7 @@
     "@types/node": "^6.0.52",
     "ts-node": "^3.3.0",
     "typescript": "3.0.0-dev.20180626",
-    "vscode": "^1.1.17"
+    "vscode": "^1.1.30"
   },
   "dependencies": {
     "vscode-languageclient": "3.5.1",

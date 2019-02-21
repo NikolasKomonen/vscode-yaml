@@ -8,21 +8,9 @@
 
 import * as path from 'path';
 
-import { workspace, Disposable, ExtensionContext, commands, languages, extensions, Uri } from 'vscode';
-import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, TransportKind, NotificationType } from 'vscode-languageclient';
-import { schemaContributor, CUSTOM_SCHEMA_REQUEST, CUSTOM_CONTENT_REQUEST } from './schema-contributor'
+import { ExtensionContext } from 'vscode';
+import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient';
 
-export interface ISchemaAssociations {
-	[pattern: string]: string[];
-}
-
-namespace SchemaAssociationNotification {
-	export const type: NotificationType<ISchemaAssociations, any> = new NotificationType('json/schemaAssociations');
-}
-
-namespace DynamicCustomSchemaRequestRegistration {
-	export const type: NotificationType<{}, {}> = new NotificationType('yaml/registerCustomSchemaRequest');
-}
 
 export function activate(context: ExtensionContext) {
 
@@ -48,12 +36,7 @@ export function activate(context: ExtensionContext) {
 		],
 		synchronize: {
 			// Synchronize the setting section 'languageServerExample' to the server
-			configurationSection: ['yaml', 'http.proxy', 'http.proxyStrictSSL'],
-			// Notify the server about file changes to '.clientrc files contain in the workspace
-			fileEvents: [
-				workspace.createFileSystemWatcher('**/*.?(e)y?(a)ml'),
-				workspace.createFileSystemWatcher('**/*.json')
-			]
+			configurationSection: ['yaml']
 		}
 	};
 
@@ -64,54 +47,4 @@ export function activate(context: ExtensionContext) {
 	// Push the disposable to the context's subscriptions so that the
 	// client can be deactivated on extension deactivation
 	context.subscriptions.push(disposable);
-
-	client.onReady().then(() => {
-		client.sendNotification(SchemaAssociationNotification.type, getSchemaAssociation(context));
-		client.sendNotification(DynamicCustomSchemaRequestRegistration.type);
-		client.onRequest(CUSTOM_SCHEMA_REQUEST, (resource) => {
-			return schemaContributor.requestCustomSchema(resource);
-		});
-		client.onRequest(CUSTOM_CONTENT_REQUEST, (uri) => {
-			return schemaContributor.requestCustomSchemaContent(uri);
-		});
-	});
-
-	languages.setLanguageConfiguration('yaml', {
-		wordPattern: /("(?:[^\\\"]*(?:\\.)?)*"?)|[^\s{}\[\],:]+/
-	});
-
-	return schemaContributor;
-}
-
-function getSchemaAssociation(context: ExtensionContext): ISchemaAssociations {
-	let associations: ISchemaAssociations = {};
-	extensions.all.forEach(extension => {
-		let packageJSON = extension.packageJSON;
-		if (packageJSON && packageJSON.contributes && packageJSON.contributes.yamlValidation) {
-			let yamlValidation = packageJSON.contributes.yamlValidation;
-			if (Array.isArray(yamlValidation)) {
-				yamlValidation.forEach(jv => {
-					let { fileMatch, url } = jv;
-					if (fileMatch && url) {
-						if (url[0] === '.' && url[1] === '/') {
-							url = Uri.file(path.join(extension.extensionPath, url)).toString();
-						}
-						if (fileMatch[0] === '%') {
-							fileMatch = fileMatch.replace(/%APP_SETTINGS_HOME%/, '/User');
-							fileMatch = fileMatch.replace(/%APP_WORKSPACES_HOME%/, '/Workspaces');
-						} else if (fileMatch.charAt(0) !== '/' && !fileMatch.match(/\w+:\/\//)) {
-							fileMatch = '/' + fileMatch;
-						}
-						let association = associations[fileMatch];
-						if (!association) {
-							association = [];
-							associations[fileMatch] = association;
-						}
-						association.push(url);
-					}
-				});
-			}
-		}
-	});
-	return associations;
 }
